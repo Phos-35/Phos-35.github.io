@@ -87,6 +87,40 @@
       grid-column: span 2;
     }
 
+    .section-title {
+      margin: 34px 0 16px;
+      text-align: center;
+    }
+
+    .section-title p {
+      margin-top: 6px;
+    }
+
+    .project-card {
+      display: flex;
+      min-height: 250px;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .button {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 20px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.3);
+    }
+
     h2 {
       margin-bottom: 14px;
       color: #1f2937;
@@ -152,27 +186,27 @@
   <main class="page">
     <header>
       <p class="eyebrow">Personal Homepage</p>
-      <h1>你好，我是 Phos-35</h1>
-      <p class="intro">欢迎来到我的个人主页。这里记录我的学习经历、兴趣方向和联系方式，希望通过这个页面展示一个简洁、清爽的个人形象。</p>
+      <h1>你好，我是唐纳德特朗普</h1>
+      <p class="intro">欢迎来到我的个人主页。这里整理了我的经历、兴趣方向、项目想法和联系方式，整体风格清爽直接，像一张可以快速了解我的数字名片。</p>
     </header>
 
     <section class="grid" aria-label="个人主页内容">
       <article class="card wide">
         <h2>关于我</h2>
-        <p>我正在学习网页制作和 GitHub Pages 部署，喜欢把想法做成可以访问的网页。这个主页是我的第一个线上展示页面，也会随着学习不断完善。</p>
+        <p>我是唐纳德特朗普，长期关注商业、地产、品牌传播和公共事务。我的经历横跨房地产开发、酒店运营、媒体节目和政治活动，擅长用鲜明的表达方式建立个人品牌。</p>
       </article>
 
       <article class="card">
         <h2>顶部标题</h2>
-        <p>一个简洁明亮的个人主页，用清晰的结构展示主要信息。</p>
+        <p>一个清晰明亮的个人主页，用简洁结构展示经历、兴趣和项目方向。</p>
       </article>
 
       <article class="card">
         <h2>兴趣爱好</h2>
         <ul>
-          <li>网页设计与前端开发</li>
-          <li>阅读与学习新技术</li>
-          <li>音乐、电影和旅行</li>
+          <li>高尔夫与体育活动</li>
+          <li>房地产与城市建筑</li>
+          <li>媒体传播与公众演讲</li>
         </ul>
       </article>
 
@@ -185,7 +219,40 @@
       </article>
     </section>
 
-    <footer>© 2026 Phos-35. Built with GitHub Pages.</footer>
+    <section aria-label="我的项目">
+      <div class="section-title">
+        <h2>我的项目</h2>
+        <p>三个我感兴趣的项目想法，围绕品牌、地产和传播展开。</p>
+      </div>
+
+      <div class="grid">
+        <article class="card project-card">
+          <div>
+            <h2>城市地标酒店</h2>
+            <p>打造一座结合豪华住宿、商务会议和城市观景体验的地标酒店，让建筑本身成为城市名片。</p>
+          </div>
+          <a class="button" href="#">查看想法</a>
+        </article>
+
+        <article class="card project-card">
+          <div>
+            <h2>个人品牌媒体</h2>
+            <p>建立一个面向公众的媒体内容平台，用视频、访谈和短评分享商业经验、观点表达和品牌故事。</p>
+          </div>
+          <a class="button" href="#">了解更多</a>
+        </article>
+
+        <article class="card project-card">
+          <div>
+            <h2>高尔夫度假社区</h2>
+            <p>规划一个融合高尔夫球场、度假住宅和会员服务的休闲社区，突出生活方式与社交体验。</p>
+          </div>
+          <a class="button" href="#">项目详情</a>
+        </article>
+      </div>
+    </section>
+
+    <footer>© 2026 唐纳德特朗普. Built with GitHub Pages.</footer>
   </main>
 </body>
 </html>
