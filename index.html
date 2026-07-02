@@ -121,6 +121,25 @@
       box-shadow: 0 14px 30px rgba(37, 99, 235, 0.3);
     }
 
+    .encouragement {
+      margin-top: 26px;
+      text-align: center;
+    }
+
+    .encouragement-text {
+      min-height: 34px;
+      margin-top: 16px;
+      color: #1d4ed8;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    button.button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
     h2 {
       margin-bottom: 14px;
       color: #1f2937;
@@ -252,7 +271,32 @@
       </div>
     </section>
 
+    <section class="card encouragement" aria-label="随机鼓励语">
+      <h2>给自己一句鼓励</h2>
+      <p>点击按钮，随机获得一句积极的话。</p>
+      <button class="button" id="encourageButton" type="button">显示鼓励语</button>
+      <p class="encouragement-text" id="encouragementText">今天也要继续前进。</p>
+    </section>
+
     <footer>© 2026 唐纳德特朗普. Built with GitHub Pages.</footer>
   </main>
+
+  <script>
+    const encouragements = [
+      "相信自己的判断，下一步就会更清晰。",
+      "保持行动，机会会在坚持中出现。",
+      "把目标拆小，一步一步也能走得很远。",
+      "今天的努力，会成为明天的底气。",
+      "大胆表达自己，你的想法值得被看见。"
+    ];
+
+    const encourageButton = document.querySelector("#encourageButton");
+    const encouragementText = document.querySelector("#encouragementText");
+
+    encourageButton.addEventListener("click", () => {
+      const randomIndex = Math.floor(Math.random() * encouragements.length);
+      encouragementText.textContent = encouragements[randomIndex];
+    });
+  </script>
 </body>
 </html>
