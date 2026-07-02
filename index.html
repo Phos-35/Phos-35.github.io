@@ -13,10 +13,13 @@
 
     body {
       min-height: 100vh;
-      color: #243041;
+      color: #f8fafc;
       font-family: "Microsoft YaHei", Arial, sans-serif;
       line-height: 1.7;
-      background: linear-gradient(135deg, #eef7ff 0%, #f7fbf8 48%, #fff8ed 100%);
+      background:
+        linear-gradient(135deg, rgba(4, 10, 28, 0.82), rgba(15, 23, 42, 0.72)),
+        url("https://media.cnn.com/api/v1/images/stellar/prod/ap24195844460448.jpg") center top / cover fixed,
+        linear-gradient(135deg, #07111f 0%, #172554 48%, #7f1d1d 100%);
     }
 
     .page {
@@ -29,10 +32,11 @@
       padding: 56px 36px;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 28px;
-      background: rgba(255, 255, 255, 0.76);
-      box-shadow: 0 20px 50px rgba(95, 128, 160, 0.18);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.62));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(14px);
     }
 
     header::after {
@@ -43,12 +47,12 @@
       content: "";
       position: absolute;
       border-radius: 50%;
-      background: linear-gradient(135deg, #90cdf4, #c6f6d5);
-      opacity: 0.58;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(220, 38, 38, 0.75));
+      opacity: 0.42;
     }
 
     .eyebrow {
-      color: #3b82f6;
+      color: #93c5fd;
       font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.18em;
@@ -64,7 +68,7 @@
     .intro {
       max-width: 640px;
       margin-top: 18px;
-      color: #526173;
+      color: #dbeafe;
       font-size: 18px;
     }
 
@@ -77,10 +81,11 @@
 
     .card {
       padding: 26px;
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 22px;
-      background: rgba(255, 255, 255, 0.82);
-      box-shadow: 0 14px 36px rgba(95, 128, 160, 0.12);
+      background: rgba(15, 23, 42, 0.72);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(12px);
     }
 
     .card.wide {
@@ -112,13 +117,13 @@
       color: #ffffff;
       font-weight: 700;
       text-decoration: none;
-      background: linear-gradient(135deg, #2563eb, #38bdf8);
-      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+      background: linear-gradient(135deg, #2563eb, #dc2626);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
     }
 
     .button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 14px 30px rgba(220, 38, 38, 0.28);
     }
 
     .encouragement {
@@ -129,7 +134,7 @@
     .encouragement-text {
       min-height: 34px;
       margin-top: 16px;
-      color: #1d4ed8;
+      color: #bfdbfe;
       font-size: 20px;
       font-weight: 700;
     }
@@ -142,12 +147,12 @@
 
     h2 {
       margin-bottom: 14px;
-      color: #1f2937;
+      color: #ffffff;
       font-size: 24px;
     }
 
     p {
-      color: #526173;
+      color: #dbeafe;
     }
 
     ul {
@@ -159,12 +164,12 @@
     li {
       padding: 10px 12px;
       border-radius: 14px;
-      color: #435166;
-      background: #f4f8fb;
+      color: #e0f2fe;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .contact-list a {
-      color: #2563eb;
+      color: #93c5fd;
       text-decoration: none;
       word-break: break-all;
     }
@@ -175,7 +180,7 @@
 
     footer {
       margin-top: 26px;
-      color: #7b8794;
+      color: #cbd5e1;
       text-align: center;
       font-size: 14px;
     }
