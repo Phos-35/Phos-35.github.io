@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高尔夫度假社区</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; color: #f8fafc; font-family: "Microsoft YaHei", Arial, sans-serif; line-height: 1.7; background: linear-gradient(135deg, rgba(4, 10, 28, 0.84), rgba(15, 23, 42, 0.74)), url("https://media.cnn.com/api/v1/images/stellar/prod/ap24195844460448.jpg") center top / cover fixed, linear-gradient(135deg, #07111f 0%, #172554 48%, #7f1d1d 100%); }
+    .page { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0; }
+    header, .card { border: 1px solid rgba(255,255,255,.18); border-radius: 28px; background: rgba(15,23,42,.74); box-shadow: 0 24px 70px rgba(0,0,0,.35); backdrop-filter: blur(14px); }
+    header { padding: 56px 36px; }
+    .eyebrow { color: #93c5fd; font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin-top: 12px; font-size: clamp(34px, 6vw, 64px); line-height: 1.08; }
+    h2 { margin-bottom: 14px; color: #fff; font-size: 24px; }
+    p { color: #dbeafe; }
+    .intro { max-width: 720px; margin-top: 18px; font-size: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
+    .card { padding: 26px; border-radius: 22px; }
+    .wide { grid-column: span 2; }
+    ul { display: grid; gap: 10px; list-style: none; }
+    li { padding: 10px 12px; border-radius: 14px; color: #e0f2fe; background: rgba(255,255,255,.1); }
+    .button { display: inline-flex; margin-top: 24px; padding: 10px 16px; border-radius: 999px; color: #fff; font-weight: 700; text-decoration: none; background: linear-gradient(135deg, #2563eb, #dc2626); }
+    footer { margin-top: 26px; color: #cbd5e1; text-align: center; font-size: 14px; }
+    @media (max-width: 760px) { .page { width: min(100% - 24px, 1040px); padding: 20px 0; } header { padding: 40px 24px; } .grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">Project Idea</p>
+      <h1>高尔夫度假社区</h1>
+      <p class="intro">这个项目参考唐纳德特朗普旗下高尔夫球场与度假地产的组合，也借鉴泰格伍兹参与球场设计、比尔盖茨等富豪重视长期资产配置和生活方式社区的思路。</p>
+      <a class="button" href="index.html">返回主页</a>
+    </header>
+
+    <section class="grid">
+      <article class="card wide">
+        <h2>项目定位</h2>
+        <p>高尔夫度假社区不只是球场，而是运动、度假住宅、会员社交、餐饮和活动的复合空间。它的核心价值来自稀缺环境、长期会员关系和高品质生活方式。</p>
+      </article>
+      <article class="card">
+        <h2>功能规划</h2>
+        <ul>
+          <li>18洞高尔夫球场与练习区</li>
+          <li>度假住宅、会所和精品酒店</li>
+          <li>会员活动、赛事和商务社交</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>体验特色</h2>
+        <p>社区强调开阔景观、私密服务和稳定社交圈。用户可以在这里运动、会客、度假，也可以把它视为长期生活方式资产。</p>
+      </article>
+      <article class="card wide">
+        <h2>商业模式</h2>
+        <p>收入来自会员费、球场运营、住宅销售、酒店餐饮和品牌赛事。项目可以学习特朗普高尔夫品牌的高端定位，同时参考顶级度假村的服务流程与社区运营。</p>
+      </article>
+    </section>
+
+    <footer>© 2026 唐纳德特朗普. Built with GitHub Pages.</footer>
+  </main>
+</body>
+</html>

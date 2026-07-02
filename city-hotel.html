@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>城市地标酒店</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      color: #f8fafc;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.7;
+      background:
+        linear-gradient(135deg, rgba(4, 10, 28, 0.84), rgba(15, 23, 42, 0.74)),
+        url("https://media.cnn.com/api/v1/images/stellar/prod/ap24195844460448.jpg") center top / cover fixed,
+        linear-gradient(135deg, #07111f 0%, #172554 48%, #7f1d1d 100%);
+    }
+    .page { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0; }
+    header, .card {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      background: rgba(15, 23, 42, 0.74);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(14px);
+    }
+    header { padding: 56px 36px; }
+    .eyebrow { color: #93c5fd; font-size: 14px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+    h1 { margin-top: 12px; font-size: clamp(34px, 6vw, 64px); line-height: 1.08; }
+    h2 { margin-bottom: 14px; color: #ffffff; font-size: 24px; }
+    p { color: #dbeafe; }
+    .intro { max-width: 720px; margin-top: 18px; font-size: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
+    .card { padding: 26px; border-radius: 22px; }
+    .wide { grid-column: span 2; }
+    ul { display: grid; gap: 10px; list-style: none; }
+    li { padding: 10px 12px; border-radius: 14px; color: #e0f2fe; background: rgba(255, 255, 255, 0.1); }
+    .button { display: inline-flex; margin-top: 24px; padding: 10px 16px; border-radius: 999px; color: #fff; font-weight: 700; text-decoration: none; background: linear-gradient(135deg, #2563eb, #dc2626); }
+    footer { margin-top: 26px; color: #cbd5e1; text-align: center; font-size: 14px; }
+    @media (max-width: 760px) { .page { width: min(100% - 24px, 1040px); padding: 20px 0; } header { padding: 40px 24px; } .grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">Project Idea</p>
+      <h1>城市地标酒店</h1>
+      <p class="intro">这个项目参考唐纳德特朗普在纽约、芝加哥等城市打造高辨识度地产与酒店品牌的思路，也借鉴迪拜、拉斯维加斯等城市用建筑塑造目的地形象的方法。</p>
+      <a class="button" href="index.html">返回主页</a>
+    </header>
+
+    <section class="grid">
+      <article class="card wide">
+        <h2>项目定位</h2>
+        <p>城市地标酒店不只是住宿空间，而是城市天际线、商业会议、餐饮娱乐和社交活动的综合入口。它需要像特朗普大厦一样有强烈的品牌识别，也需要像现代奢华酒店集团一样重视服务体验。</p>
+      </article>
+      <article class="card">
+        <h2>核心客群</h2>
+        <ul>
+          <li>商务会议与高端差旅人群</li>
+          <li>城市旅游与观景体验用户</li>
+          <li>品牌活动与社交聚会客户</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>设计亮点</h2>
+        <p>建筑外观采用醒目的塔楼轮廓，内部设置城市观景层、会员酒廊、精品餐厅和大型宴会厅，让酒店本身成为值得打卡的目的地。</p>
+      </article>
+      <article class="card wide">
+        <h2>商业模式</h2>
+        <p>收入来源包括客房、餐饮、会议宴会、品牌授权和会员服务。项目可以学习特朗普品牌地产的高曝光方式，同时参考万豪、希尔顿等成熟酒店集团的运营标准。</p>
+      </article>
+    </section>
+
+    <footer>© 2026 唐纳德特朗普. Built with GitHub Pages.</footer>
+  </main>
+</body>
+</html>
