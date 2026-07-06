@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>植物大战僵尸 - 无限阳光关卡</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      color: #244014;
+      background: linear-gradient(#86c96f, #42752d);
+      user-select: none;
+    }
+
+    .game {
+      width: min(1180px, 100vw);
+      height: min(780px, 100vh);
+      margin: 0 auto;
+      position: relative;
+      padding: 16px;
+    }
+
+    .topbar {
+      height: 144px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px;
+      border: 4px solid #4d3218;
+      border-radius: 16px;
+      background: linear-gradient(#f7d484, #c88735);
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    .sun-box {
+      width: 110px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border: 3px solid #724514;
+      border-radius: 12px;
+      background: #ffe878;
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .card {
+      width: 68px;
+      height: 78px;
+      border: 3px solid #3c2812;
+      border-radius: 12px;
+      background: linear-gradient(#d8ffd1, #74bb61);
+      box-shadow: inset 0 -6px rgba(0, 0, 0, 0.14);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      transition: transform 0.12s, outline 0.12s;
+    }
+
+    .card.selected {
+      outline: 5px solid #fff377;
+      transform: translateY(-5px);
+    }
+
+    .card.shovel {
+      background: linear-gradient(#eee, #9fa7ad);
+    }
+
+    .status {
+      margin-left: auto;
+      width: 205px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .speed-button {
+      padding: 3px 7px;
+      border: 2px solid #4d3218;
+      border-radius: 8px;
+      background: #ffe878;
+      color: #4d3218;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .speed-button.active {
+      background: #5bad35;
+      color: #fff;
+    }
+
+    .mode-control {
+      display: flex;
+      gap: 5px;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .game-control {
+      display: flex;
+      gap: 5px;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .board-wrap {
+      position: relative;
+      margin-top: 16px;
+      height: 540px;
+      border: 5px solid #4d3218;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #5ba640;
+      box-shadow: 0 12px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .prep-zone {
+      position: absolute;
+      left: 994px;
+      top: 28px;
+      width: 132px;
+      height: 450px;
+      border-left: 5px solid rgba(77, 50, 24, 0.65);
+      background: linear-gradient(90deg, rgba(63, 42, 30, 0.28), rgba(38, 28, 24, 0.48));
+      z-index: 1;
+    }
+
+    .prep-zone::before {
+      content: "僵尸\A预备区";
+      white-space: pre;
+      position: absolute;
+      left: 18px;
+      top: 12px;
+      color: rgba(255, 244, 190, 0.9);
+      font-weight: 900;
+      line-height: 1.25;
+      text-shadow: 0 2px 2px rgba(0, 0, 0, 0.45);
+    }
+
+    .fail-line {
+      position: absolute;
+      left: 5px;
+      top: 28px;
+      width: 5px;
+      height: 450px;
+      background: repeating-linear-gradient(180deg, #ff3131 0 18px, #fff177 19px 32px);
+      box-shadow: 0 0 10px rgba(255, 49, 49, 0.85);
+      z-index: 2;
+    }
+
+    .board {
+      position: absolute;
+      left: 82px;
+      top: 28px;
+      width: 900px;
+      height: 450px;
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      border-left: 8px solid rgba(50, 82, 25, 0.35);
+    }
+
+    .cell {
+      position: relative;
+      border: 1px solid rgba(33, 80, 18, 0.28);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.04));
+      cursor: pointer;
+    }
+
+    .cell:nth-child(odd) {
+      background-color: rgba(151, 217, 104, 0.28);
+    }
+
+    .cell:nth-child(even) {
+      background-color: rgba(91, 166, 64, 0.34);
+    }
+
+    .cell:hover {
+      outline: 4px solid rgba(255, 255, 120, 0.8);
+      z-index: 2;
+    }
+
+    .lane-mark {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 90px;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.25);
+      pointer-events: none;
+    }
+
+    .entity {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .plant {
+      left: 8px;
+      top: 4px;
+      width: 86px;
+      height: 82px;
+      overflow: visible;
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.16));
+      transform-origin: 50% 92%;
+      animation: plant-sway 2.4s ease-in-out infinite;
+    }
+
+    @keyframes plant-sway {
+      0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+      50% { transform: rotate(1.5deg) translateY(-2px); }
+    }
+
+    .plant .stem {
+      position: absolute;
+      left: 38px;
+      top: 42px;
+      width: 11px;
+      height: 30px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #2e8d30, #63c44f, #207127);
+      z-index: 1;
+    }
+
+    .plant .leaf {
+      position: absolute;
+      top: 56px;
+      width: 30px;
+      height: 17px;
+      border-radius: 100% 0 100% 0;
+      background: linear-gradient(135deg, #72da57, #218d2b);
+      z-index: 2;
+    }
+
+    .plant .leaf.left {
+      left: 18px;
+      transform: rotate(-20deg);
+    }
+
+    .plant .leaf.right {
+      right: 15px;
+      transform: rotate(35deg) scaleX(-1);
+    }
+
+    .plant .head {
+      position: absolute;
+      left: 10px;
+      top: 3px;
+      width: 58px;
+      height: 52px;
+      border: 4px solid #236a29;
+      border-radius: 52% 48% 48% 52%;
+      background: radial-gradient(circle at 32% 24%, #dffff0 0 10%, #6ed36a 11% 58%, #2c9a3c 59%);
+      z-index: 4;
+    }
+
+    .plant .eye {
+      position: absolute;
+      top: 17px;
+      width: 8px;
+      height: 11px;
+      border-radius: 50%;
+      background: #182214;
+      z-index: 6;
+    }
+
+    .plant .eye.left {
+      left: 25px;
+    }
+
+    .plant .eye.right {
+      left: 42px;
+    }
+
+    .plant .mouth {
+      position: absolute;
+      left: 58px;
+      top: 18px;
+      width: 27px;
+      height: 22px;
+      border: 4px solid #236a29;
+      border-left: 0;
+      border-radius: 0 18px 18px 0;
+      background: radial-gradient(circle at 70% 45%, #194d1e 0 26%, #67ca62 27%);
+      z-index: 5;
+    }
+
+    .plant.ice {
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.16)) drop-shadow(0 0 8px rgba(147, 233, 255, 0.7));
+    }
+
+    .plant.ice .head,
+    .plant.ice .mouth {
+      border-color: #1f7390;
+      background: radial-gradient(circle at 32% 24%, #fff 0 10%, #8ce8ff 11% 58%, #2496c2 59%);
+    }
+
+    .plant.fire {
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.16)) drop-shadow(0 0 8px rgba(255, 115, 50, 0.55));
+    }
+
+    .plant.fire .head,
+    .plant.fire .mouth {
+      border-color: #8a2b12;
+      background: radial-gradient(circle at 32% 24%, #fff1a6 0 10%, #ff8a4b 11% 58%, #b82c1d 59%);
+    }
+
+    .plant.sunflower .head {
+      left: 15px;
+      top: 3px;
+      width: 58px;
+      height: 58px;
+      border-color: #9b6b13;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, #6b3b16 0 31%, #ffd94f 32% 56%, #e58a20 57%);
+    }
+
+    .plant.sunflower .head::before {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: -12px;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(#ffd94f 0 14deg, #f39a22 15deg 28deg);
+      z-index: -1;
+    }
+
+    .plant.sunflower .mouth {
+      display: none;
+    }
+
+    .plant.heavy {
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.16)) drop-shadow(0 0 8px rgba(116, 185, 255, 0.5));
+    }
+
+    .plant.heavy .head {
+      width: 62px;
+      height: 54px;
+      border-color: #3e4678;
+      border-radius: 48% 48% 55% 55%;
+      background: repeating-radial-gradient(circle at 38% 28%, #dff8ff 0 5px, #91d7ff 6px 11px, #4f89c8 12px 17px);
+    }
+
+    .plant.heavy .mouth {
+      border-color: #3e4678;
+      background: radial-gradient(circle at 70% 45%, #182451 0 26%, #75bff0 27%);
+    }
+
+    .plant.wallnut .stem,
+    .plant.wallnut .leaf,
+    .plant.wallnut .mouth {
+      display: none;
+    }
+
+    .plant.wallnut .head {
+      left: 14px;
+      top: 2px;
+      width: 58px;
+      height: 75px;
+      border-color: #6e431c;
+      border-radius: 48% 52% 45% 45%;
+      background: radial-gradient(circle at 35% 20%, #f5d59b 0 13%, #bd7f35 14% 58%, #7c491f 59%);
+    }
+
+    .plant.wallnut .head::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 9px;
+      width: 34px;
+      height: 48px;
+      border-left: 2px solid rgba(78, 43, 16, 0.45);
+      border-right: 2px solid rgba(78, 43, 16, 0.35);
+      border-radius: 50%;
+    }
+
+    .plant.wallnut .eye.left {
+      left: 29px;
+      top: 25px;
+    }
+
+    .plant.wallnut .eye.right {
+      left: 48px;
+      top: 25px;
+    }
+
+    .plant.bomb .stem,
+    .plant.bomb .leaf,
+    .plant.bomb .mouth {
+      display: none;
+    }
+
+    .plant.bomb .head {
+      left: 13px;
+      top: 14px;
+      width: 60px;
+      height: 52px;
+      border-color: #7b1515;
+      border-radius: 48% 52% 54% 46%;
+      background: radial-gradient(circle at 34% 24%, #ffd0ca 0 10%, #dc2d25 11% 62%, #8d1615 63%);
+    }
+
+    .plant.bomb .head::before,
+    .plant.bomb .head::after {
+      content: "";
+      position: absolute;
+      top: -18px;
+      width: 34px;
+      height: 30px;
+      border: 4px solid #7b1515;
+      border-bottom: 0;
+      border-radius: 28px 28px 0 0;
+      background: radial-gradient(circle at 35% 25%, #ffd0ca, #dc2d25 60%);
+    }
+
+    .plant.bomb .head::before {
+      left: -1px;
+      transform: rotate(-18deg);
+    }
+
+    .plant.bomb .head::after {
+      right: -1px;
+      transform: rotate(18deg);
+    }
+
+    .plant.tallnut .stem,
+    .plant.tallnut .leaf,
+    .plant.tallnut .mouth {
+      display: none;
+    }
+
+    .plant.tallnut .head {
+      left: 12px;
+      top: -3px;
+      width: 62px;
+      height: 84px;
+      border-color: #6e431c;
+      border-radius: 46% 54% 40% 42%;
+      background: radial-gradient(circle at 35% 18%, #f8dfab 0 12%, #c0843a 13% 58%, #71421f 59%);
+    }
+
+    .plant.tallnut .eye.left {
+      left: 29px;
+      top: 29px;
+    }
+
+    .plant.tallnut .eye.right {
+      left: 50px;
+      top: 29px;
+    }
+
+    .plant.tallnut.damage-third .head {
+      clip-path: polygon(0 0, 100% 0, 100% 66%, 82% 59%, 65% 69%, 48% 62%, 30% 70%, 0 64%);
+    }
+
+    .plant.tallnut.damage-half .head {
+      clip-path: polygon(0 0, 100% 0, 100% 48%, 83% 41%, 66% 51%, 48% 44%, 29% 53%, 0 47%);
+    }
+
+    .plant.tallnut.damage-half .eye {
+      top: 20px;
+    }
+
+    .plant.torchwood .mouth {
+      display: none;
+    }
+
+    .plant.torchwood .head {
+      left: 20px;
+      top: 2px;
+      width: 47px;
+      height: 70px;
+      border-color: #5e3517;
+      border-radius: 16px 16px 12px 12px;
+      background: linear-gradient(90deg, #7a461f, #b46d2c 45%, #5f3518);
+    }
+
+    .plant.torchwood .head::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: -20px;
+      width: 23px;
+      height: 30px;
+      border-radius: 50% 50% 45% 45%;
+      background: radial-gradient(circle at 50% 72%, #fff277 0 14%, #ff9f1f 15% 58%, #d72817 59%);
+      box-shadow: 0 0 12px rgba(255, 109, 24, 0.8);
+    }
+
+    .plant.spikerock .stem,
+    .plant.spikerock .leaf,
+    .plant.spikerock .mouth {
+      display: none;
+    }
+
+    .plant.spikerock .head {
+      left: 6px;
+      top: 49px;
+      width: 76px;
+      height: 24px;
+      border-color: #333;
+      border-radius: 15px;
+      background: linear-gradient(#686868, #2f2f2f);
+    }
+
+    .plant.spikerock .head::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: -26px;
+      width: 60px;
+      height: 30px;
+      background: repeating-linear-gradient(110deg, transparent 0 8px, #cfcfcf 9px 16px, transparent 17px 25px);
+    }
+
+    .plant.spikerock .eye {
+      top: 55px;
+      width: 7px;
+      height: 8px;
+      background: #fff3a0;
+      box-shadow: inset 2px 0 0 #171717;
+    }
+
+    .plant.spikerock .eye.left {
+      left: 30px;
+    }
+
+    .plant.spikerock .eye.right {
+      left: 50px;
+    }
+
+    .plant.cob .head {
+      border-color: #7d6516;
+      background: repeating-linear-gradient(90deg, #ffe36d 0 8px, #d89a24 9px 14px);
+    }
+
+    .plant.cob .mouth {
+      border-color: #7d6516;
+      background: radial-gradient(circle at 70% 45%, #57360b 0 26%, #ffd65a 27%);
+    }
+
+    .plant.starfruit .head {
+      clip-path: polygon(50% 0, 62% 33%, 98% 35%, 69% 56%, 79% 91%, 50% 70%, 21% 91%, 31% 56%, 2% 35%, 38% 33%);
+      border-radius: 0;
+      background: radial-gradient(circle at 35% 30%, #fff9a8 0 12%, #f4d33b 13% 64%, #d88916 65%);
+    }
+
+    .plant.magnet .head {
+      border-color: #474747;
+      background: radial-gradient(circle at 35% 25%, #fff 0 10%, #cfcfcf 11% 58%, #686868 59%);
+    }
+
+    .plant.magnet .head::after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: -8px;
+      width: 34px;
+      height: 22px;
+      border: 7px solid #c73535;
+      border-bottom: 0;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .zombie {
+      width: 76px;
+      height: 84px;
+      z-index: 6;
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.18));
+      transform-origin: 50% 95%;
+      animation: zombie-wobble 0.82s ease-in-out infinite;
+    }
+
+    @keyframes zombie-wobble {
+      0%, 100% { transform: rotate(-2deg) translateY(0); }
+      50% { transform: rotate(2deg) translateY(2px); }
+    }
+
+    .zombie .head {
+      position: absolute;
+      left: 25px;
+      top: 0;
+      width: 40px;
+      height: 43px;
+      border: 4px solid #334238;
+      border-radius: 48% 50% 45% 48%;
+      background: radial-gradient(circle at 30% 25%, #e2eadf 0 10%, #a9b9a6 11% 60%, #687f6f 61%);
+      z-index: 5;
+    }
+
+    .zombie .head::before,
+    .zombie .head::after {
+      content: "";
+      position: absolute;
+      top: 14px;
+      width: 7px;
+      height: 9px;
+      border-radius: 50%;
+      background: #1b211d;
+    }
+
+    .zombie .head::before {
+      left: 9px;
+    }
+
+    .zombie .head::after {
+      left: 24px;
+    }
+
+    .zombie .mouth {
+      position: absolute;
+      left: 37px;
+      top: 30px;
+      width: 18px;
+      height: 7px;
+      border-radius: 8px;
+      background: #3c2422;
+      z-index: 6;
+    }
+
+    .zombie .body {
+      position: absolute;
+      left: 22px;
+      top: 39px;
+      width: 38px;
+      height: 36px;
+      border: 4px solid #253a55;
+      border-radius: 8px 8px 12px 12px;
+      background: linear-gradient(90deg, #6a4a30 0 28%, #8c312a 29% 56%, #354c6d 57%);
+      z-index: 3;
+    }
+
+    .zombie .arm {
+      position: absolute;
+      top: 43px;
+      width: 32px;
+      height: 10px;
+      border: 3px solid #334238;
+      border-radius: 10px;
+      background: #9cae99;
+      z-index: 4;
+    }
+
+    .zombie .arm.left {
+      left: 4px;
+      transform: rotate(14deg);
+    }
+
+    .zombie .arm.right {
+      left: 48px;
+      transform: rotate(-14deg);
+    }
+
+    .zombie .leg {
+      position: absolute;
+      top: 69px;
+      width: 12px;
+      height: 18px;
+      border-radius: 0 0 8px 8px;
+      background: #29364c;
+      z-index: 2;
+    }
+
+    .zombie .leg.left {
+      left: 28px;
+      transform: rotate(8deg);
+    }
+
+    .zombie .leg.right {
+      left: 48px;
+      transform: rotate(-8deg);
+    }
+
+    .zombie.cone .head::after {
+      width: 0;
+      height: 0;
+      left: -2px;
+      top: -31px;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 34px solid #e97824;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .zombie.bucket .head::after {
+      left: -3px;
+      top: -16px;
+      width: 39px;
+      height: 22px;
+      border: 3px solid #595959;
+      border-radius: 5px 5px 10px 10px;
+      background: linear-gradient(#d5d5d5, #777);
+    }
+
+    .zombie.football .body {
+      border-color: #421515;
+      background: linear-gradient(90deg, #8d1b22, #d13a3a 55%, #381213);
+    }
+
+    .zombie.football .head::after {
+      left: -4px;
+      top: -8px;
+      width: 40px;
+      height: 18px;
+      border: 3px solid #3f1c1c;
+      border-radius: 16px 16px 6px 6px;
+      background: #7b1419;
+    }
+
+    .zombie.gargantuar {
+      transform-origin: center bottom;
+      scale: 1.32;
+    }
+
+    .zombie.gargantuar .body {
+      background: linear-gradient(90deg, #4a3d50, #70637c 55%, #332b38);
+    }
+
+    .zombie.dancer .body {
+      border-color: #39204d;
+      background: linear-gradient(90deg, #5b2d82, #c347b8 55%, #2b153e);
+    }
+
+    .zombie.dancer .head::after {
+      left: 3px;
+      top: -11px;
+      width: 31px;
+      height: 14px;
+      border-radius: 50% 50% 8px 8px;
+      background: #1d1d1d;
+    }
+
+    .zombie.flag .arm.right {
+      top: 21px;
+      height: 43px;
+      transform: rotate(-8deg);
+    }
+
+    .zombie.flag .arm.right::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: -20px;
+      width: 30px;
+      height: 22px;
+      border: 2px solid #8a1212;
+      background: linear-gradient(#f44, #b91515);
+    }
+
+    .zombie.screen .body::after {
+      content: "";
+      position: absolute;
+      left: -17px;
+      top: -4px;
+      width: 32px;
+      height: 43px;
+      border: 4px solid #5b5b5b;
+      border-radius: 8px;
+      background: repeating-linear-gradient(45deg, #cfd5d9 0 6px, #8f989e 7px 12px);
+      box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35);
+    }
+
+    .zombie.runner .leg.left,
+    .zombie.runner .leg.right {
+      height: 23px;
+      background: #1f2b40;
+    }
+
+    .zombie.runner .head::after {
+      left: -3px;
+      top: -10px;
+      width: 40px;
+      height: 12px;
+      border-radius: 12px 12px 4px 4px;
+      background: #2d3550;
+    }
+
+    .zombie.doctor .body {
+      border-color: #6b6b6b;
+      background: linear-gradient(90deg, #e9f0f1, #ffffff 55%, #b9c3c7);
+    }
+
+    .zombie.doctor .body::after {
+      content: "+";
+      position: absolute;
+      left: 12px;
+      top: 5px;
+      color: #d22626;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .mower {
+      width: 64px;
+      height: 42px;
+      z-index: 7;
+      filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.2));
+    }
+
+    .mower::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      width: 44px;
+      height: 22px;
+      border: 4px solid #8b1b16;
+      border-radius: 8px 14px 8px 8px;
+      background: linear-gradient(#ff5b3f, #b82018);
+    }
+
+    .mower::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 28px;
+      width: 49px;
+      height: 12px;
+      border-radius: 10px;
+      background: radial-gradient(circle at 8px 6px, #333 0 5px, transparent 6px), radial-gradient(circle at 39px 6px, #333 0 5px, transparent 6px);
+    }
+
+    .sun-drop {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 4px solid #f0a51c;
+      background: radial-gradient(circle at 35% 32%, #fff9a8 0 18%, #ffe352 19% 58%, #f39a1f 59%);
+      box-shadow: 0 0 16px rgba(255, 221, 58, 0.95);
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 12;
+      transition: left 0.75s cubic-bezier(0.2, 0.85, 0.2, 1), top 0.75s cubic-bezier(0.2, 0.85, 0.2, 1), transform 0.18s, opacity 0.18s;
+    }
+
+    .sun-drop::before {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(rgba(255, 232, 70, 0.9) 0 10deg, transparent 11deg 22deg);
+      z-index: -1;
+      animation: sun-spin 2s linear infinite;
+    }
+
+    .sun-drop.collecting {
+      transform: scale(1.45);
+      opacity: 0;
+    }
+
+    @keyframes sun-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .bullet {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #eaffb8, #78d547 60%, #2b8b27);
+      border: 2px solid #27651f;
+      z-index: 5;
+    }
+
+    .bullet.ice {
+      background: radial-gradient(circle at 35% 35%, #fff, #8cecff 60%, #2999c7);
+      border-color: #19718e;
+    }
+
+    .bullet.fire {
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle at 35% 35%, #fff6a6 0 18%, #ff8c22 48%, #d62413 78%);
+      border-color: #9c1d0f;
+      box-shadow: 0 0 12px rgba(255, 103, 20, 0.85);
+    }
+
+    .bullet.heavy {
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle at 35% 35%, #fff, #d6c4ff 55%, #5d3aa7);
+      border-color: #3f2a72;
+    }
+
+    .bullet.cob-shot {
+      width: 42px;
+      height: 42px;
+      border: 4px solid #7d6516;
+      background: radial-gradient(circle at 34% 30%, #fff6a4 0 16%, #ffd94a 17% 46%, #d88916 47% 72%, #8b4b0d 73%);
+      box-shadow: 0 0 18px rgba(255, 190, 38, 0.88);
+    }
+
+    .message {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 320px;
+      padding: 24px 32px;
+      border: 5px solid #4d3218;
+      border-radius: 18px;
+      background: rgba(255, 244, 182, 0.96);
+      text-align: center;
+      font-size: 26px;
+      font-weight: 900;
+      display: none;
+      z-index: 20;
+    }
+
+    .message button {
+      margin-top: 16px;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 10px;
+      background: #5bad35;
+      color: #fff;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .wave-alert {
+      position: absolute;
+      left: 50%;
+      top: 47%;
+      transform: translate(-50%, -50%);
+      padding: 18px 34px;
+      border: 5px solid #7c1710;
+      border-radius: 18px;
+      background: linear-gradient(#fff09a, #ff7b2c 62%, #b71414);
+      color: #fff8c6;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 0 4px 0 rgba(92, 10, 8, 0.8), 0 0 16px rgba(255, 239, 83, 0.9);
+      z-index: 18;
+      pointer-events: none;
+      animation: wave-alert 2.2s ease-in-out forwards;
+    }
+
+    @keyframes wave-alert {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.55); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+      78% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22); }
+    }
+
+    .explosion-range {
+      position: absolute;
+      width: 300px;
+      height: 270px;
+      z-index: 12;
+      pointer-events: none;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 245, 114, 0.95);
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 8%, rgba(255, 239, 61, 0.95) 9% 22%, rgba(255, 119, 24, 0.82) 23% 48%, rgba(201, 29, 17, 0.32) 49% 70%, rgba(201, 29, 17, 0) 71%);
+      box-shadow: inset 0 0 44px rgba(255, 255, 255, 0.58), 0 0 34px rgba(255, 82, 20, 0.88);
+      animation: explosion-burst 0.64s ease-out forwards;
+    }
+
+    @keyframes explosion-burst {
+      0% { opacity: 0; transform: scale(0.08); filter: brightness(2.2); }
+      16% { opacity: 1; transform: scale(0.34); }
+      48% { opacity: 0.96; transform: scale(0.82); }
+      78% { opacity: 0.75; transform: scale(1.04); }
+      100% { opacity: 0; transform: scale(1.18); filter: brightness(0.9); }
+    }
+
+    .hint {
+      position: absolute;
+      left: 18px;
+      bottom: 12px;
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 800;
+      text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .game {
+        width: 1180px;
+        height: 780px;
+        transform: scale(min(calc(100vw / 1180), calc(100vh / 780)));
+        transform-origin: top left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <section class="topbar">
+      <div class="sun-box">现有阳光数<br><span id="sun">∞</span></div>
+      <button class="card" data-plant="sunflower">向日葵<br>50</button>
+      <button class="card selected" data-plant="gatling">机枪<br>射手</button>
+      <button class="card" data-plant="wintermelon">冰瓜<br>投手</button>
+      <button class="card" data-plant="tallnut">高<br>坚果</button>
+      <button class="card" data-plant="torchwood">火炬<br>树桩</button>
+      <button class="card" data-plant="spikerock">地刺<br>王</button>
+      <button class="card" data-plant="cherrybomb">樱桃<br>炸弹</button>
+      <button class="card" data-plant="cobcannon">玉米<br>加农炮</button>
+      <button class="card" data-plant="starfruit">杨桃<br>射手</button>
+      <button class="card" data-plant="magnetshroom">磁力<br>菇</button>
+      <button class="card shovel" data-plant="shovel">铲子<br>移除</button>
+      <div class="status">
+        <div>无限波次：第 <span id="wave">1</span> 波</div>
+        <div>剩余僵尸：<span id="left">0</span></div>
+        <div>当前植物：<span id="selected">机枪射手</span></div>
+        <div class="speed-control">速度
+          <button class="speed-button active" data-speed="1">1x</button>
+          <button class="speed-button" data-speed="2">2x</button>
+          <button class="speed-button" data-speed="4">4x</button>
+        </div>
+        <div class="mode-control">
+          <button class="speed-button active" data-mode="infinite">无限阳光</button>
+          <button class="speed-button" data-mode="normal">正常模式</button>
+        </div>
+        <div class="game-control">
+          <button class="speed-button" id="startButton">开始游戏</button>
+          <button class="speed-button" id="pauseButton">暂停</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="board-wrap" id="arena">
+      <div class="fail-line"></div>
+      <div class="board" id="board"></div>
+      <div class="prep-zone" id="prepZone"></div>
+      <div class="message" id="message"></div>
+      <div class="hint">玩法：阳光无限。后期植物更强，僵尸波次无限递增，坚持越久难度越高。</div>
+    </section>
+  </main>
+
+  <script>
+    const rows = 5;
+    const cols = 9;
+    const cellW = 100;
+    const cellH = 90;
+    const boardLeft = 82;
+    const boardTop = 28;
+    const arena = document.getElementById("arena");
+    const board = document.getElementById("board");
+    const waveEl = document.getElementById("wave");
+    const leftEl = document.getElementById("left");
+    const selectedEl = document.getElementById("selected");
+    const message = document.getElementById("message");
+    const sunEl = document.getElementById("sun");
+    const startButton = document.getElementById("startButton");
+    const pauseButton = document.getElementById("pauseButton");
+
+    const plantNames = {
+      sunflower: "向日葵",
+      gatling: "机枪射手",
+      wintermelon: "冰瓜投手",
+      tallnut: "高坚果",
+      torchwood: "火炬树桩",
+      spikerock: "地刺王",
+      cherrybomb: "樱桃炸弹",
+      cobcannon: "玉米加农炮",
+      starfruit: "杨桃射手",
+      magnetshroom: "磁力菇",
+      shovel: "铲子"
+    };
+
+    const plantStats = {
+      sunflower: { hp: 110, className: "sunflower", shoots: false, sunProducer: true, sunCooldown: 3 },
+      gatling: { hp: 160, className: "fire", shoots: true, damage: 28, cooldown: 0.28, speed: 410, torchable: true },
+      wintermelon: { hp: 220, className: "heavy", shoots: true, damage: 95, cooldown: 2, speed: 260, splashCells: 2, slow: 2.8, heavy: true },
+      tallnut: { hp: 1350, className: "tallnut", shoots: false },
+      torchwood: { hp: 420, className: "torchwood", shoots: false, torch: true },
+      spikerock: { hp: 760, className: "spikerock", shoots: false, spike: true, spikeDamage: 60, spikeCooldown: 3, spikeSlow: 1.5 },
+      cherrybomb: { hp: 1, className: "bomb", shoots: false, bomb: true, radius: 1, damage: 820 },
+      cobcannon: { hp: 300, className: "cob", shoots: true, damage: 230, cooldown: 4, speed: 235, splashRadius: 1, cobShot: true },
+      starfruit: { hp: 170, className: "starfruit", shoots: true, damage: 40, cooldown: 0.62, speed: 360, star: true },
+      magnetshroom: { hp: 150, className: "magnet", shoots: false, magnet: true, magnetCooldown: 4.8 }
+    };
+
+    const zombieTypes = [
+      { type: "normal", name: "普通僵尸", unlock: 1, hp: 130, speed: 15, bite: 24, weight: 9 },
+      { type: "flag", name: "旗帜僵尸", unlock: 2, hp: 170, speed: 20, bite: 26, weight: 4 },
+      { type: "cone", name: "路障僵尸", unlock: 2, hp: 280, speed: 14, bite: 32, weight: 6, armored: true },
+      { type: "screen", name: "铁门僵尸", unlock: 3, hp: 430, speed: 12, bite: 36, weight: 4, armored: true },
+      { type: "bucket", name: "铁桶僵尸", unlock: 4, hp: 540, speed: 13, bite: 40, weight: 4, armored: true },
+      { type: "runner", name: "奔跑僵尸", unlock: 5, hp: 320, speed: 30, bite: 34, weight: 3 },
+      { type: "football", name: "橄榄球僵尸", unlock: 6, hp: 700, speed: 24, bite: 54, weight: 3, armored: true },
+      { type: "doctor", name: "医生僵尸", unlock: 7, hp: 460, speed: 17, bite: 46, weight: 2 },
+      { type: "dancer", name: "舞王僵尸", unlock: 8, hp: 560, speed: 19, bite: 42, weight: 2 },
+      { type: "gargantuar", name: "巨人僵尸", unlock: 11, hp: 1700, speed: 10, bite: 110, weight: 1, armored: true }
+    ];
+
+    let selectedPlant = "gatling";
+    let currentWave = 1;
+    let spawnQueue = 0;
+    let waveActive = false;
+    let gameOver = false;
+    let lastTime = performance.now();
+    let plants = [];
+    let zombies = [];
+    let bullets = [];
+    let mowers = [];
+    let sunDrops = [];
+    let gameSpeed = 1;
+    let sun = 100;
+    let sunMode = "infinite";
+    let gameStarted = false;
+    let paused = false;
+    let spawnTimer = 0;
+    let nextWaveTimer = 0;
+    let alertTimer = null;
+
+    function isHugeWave() {
+      return currentWave % 9 === 0;
+    }
+
+    function showWaveAlert(text) {
+      const alert = document.createElement("div");
+      alert.className = "wave-alert";
+      alert.textContent = text;
+      arena.appendChild(alert);
+      clearTimeout(alertTimer);
+      alertTimer = setTimeout(() => alert.remove(), 2300);
+    }
+
+    function updateSunDisplay() {
+      sunEl.textContent = sunMode === "infinite" ? "∞" : sun;
+    }
+
+    for (let r = 0; r < rows; r++) {
+      const lane = document.createElement("div");
+      lane.className = "lane-mark";
+      lane.style.top = boardTop + r * cellH + "px";
+      arena.appendChild(lane);
+    }
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        cell.addEventListener("click", () => plantAt(r, c, cell));
+        board.appendChild(cell);
+      }
+    }
+
+    arena.addEventListener("click", event => {
+      if (event.target.closest(".cell") || event.target.closest(".sun-drop") || event.target.closest(".message")) return;
+      const rect = arena.getBoundingClientRect();
+      const x = event.clientX - rect.left - boardLeft;
+      const y = event.clientY - rect.top - boardTop;
+      const col = Math.floor(x / cellW);
+      const row = Math.floor(y / cellH);
+      if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+      plantAt(row, col, board.children[row * cols + col]);
+    });
+
+    document.querySelectorAll(".card").forEach(card => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".card").forEach(item => item.classList.remove("selected"));
+        card.classList.add("selected");
+        selectedPlant = card.dataset.plant;
+        selectedEl.textContent = plantNames[selectedPlant];
+      });
+    });
+
+    document.querySelectorAll(".speed-button").forEach(button => {
+      if (!button.dataset.speed) return;
+      button.addEventListener("click", () => {
+        gameSpeed = Number(button.dataset.speed);
+        document.querySelectorAll(".speed-button[data-speed]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+
+    document.querySelectorAll(".speed-button[data-mode]").forEach(button => {
+      button.addEventListener("click", () => {
+        sunMode = button.dataset.mode;
+        if (sunMode === "normal" && sun < 100 && plants.length === 0) sun = 100;
+        document.querySelectorAll(".speed-button[data-mode]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        updateSunDisplay();
+      });
+    });
+
+    startButton.addEventListener("click", () => {
+      if (!gameStarted) {
+        if (gameOver) return;
+        gameStarted = true;
+        gameOver = false;
+        paused = false;
+        startButton.textContent = "结束游戏";
+        pauseButton.textContent = "暂停";
+        message.style.display = "none";
+        startWave();
+        return;
+      }
+      endGame(true);
+    });
+
+    pauseButton.addEventListener("click", () => {
+      if (!gameStarted || gameOver) return;
+      paused = !paused;
+      pauseButton.textContent = paused ? "继续" : "暂停";
+    });
+
+    for (let row = 0; row < rows; row++) {
+      const el = document.createElement("div");
+      el.className = "entity mower";
+      arena.appendChild(el);
+      mowers.push({ row, x: boardLeft - 70, y: boardTop + row * cellH + 24, active: false, used: false, el });
+    }
+
+    function plantHtml() {
+      return '<span class="stem"></span>' +
+        '<span class="leaf left"></span>' +
+        '<span class="leaf right"></span>' +
+        '<span class="head"></span>' +
+        '<span class="eye left"></span>' +
+        '<span class="eye right"></span>' +
+        '<span class="mouth"></span>';
+    }
+
+    function zombieHtml() {
+      return '<span class="arm left"></span>' +
+        '<span class="arm right"></span>' +
+        '<span class="leg left"></span>' +
+        '<span class="leg right"></span>' +
+        '<span class="body"></span>' +
+        '<span class="head"></span>' +
+        '<span class="mouth"></span>';
+    }
+
+    function plantAt(row, col, cell) {
+      if (gameOver) return;
+
+      const existingPlant = plants.find(plant => plant.row === row && plant.col === col);
+      if (selectedPlant === "shovel") {
+        if (!existingPlant) return;
+        existingPlant.el.remove();
+        plants = plants.filter(plant => plant !== existingPlant);
+        return;
+      }
+
+      if (existingPlant) return;
+
+      const stats = plantStats[selectedPlant];
+      const cost = 50;
+      if (sunMode === "normal" && sun < cost) return;
+      if (sunMode === "normal") {
+        sun -= cost;
+        updateSunDisplay();
+      }
+      const el = document.createElement("div");
+      el.className = "entity plant " + stats.className;
+      el.innerHTML = plantHtml();
+      cell.appendChild(el);
+
+      if (stats.bomb) {
+        plants.push({
+          type: selectedPlant,
+          row,
+          col,
+          hp: stats.hp,
+          maxHp: stats.hp,
+          stats,
+          shoots: false,
+          bombTimer: 3,
+          triggered: false,
+          exploding: false,
+          el,
+          cell
+        });
+        return;
+      }
+
+      plants.push({
+        type: selectedPlant,
+        row,
+        col,
+        hp: stats.hp,
+        maxHp: stats.hp,
+        stats,
+        shoots: stats.shoots,
+        cooldown: 0,
+        spikeTimer: 0,
+        magnetTimer: 1,
+        sunTimer: stats.sunCooldown || 0,
+        el,
+        cell
+      });
+    }
+
+    function startWave() {
+      const hugeWave = isHugeWave();
+      waveActive = true;
+      spawnQueue = 4 + Math.floor(currentWave * 2.4);
+      if (hugeWave) {
+        spawnQueue = Math.ceil(spawnQueue * 1.85) + 5;
+        showWaveAlert("一大波僵尸来袭！");
+      }
+      waveEl.textContent = currentWave;
+      leftEl.textContent = spawnQueue;
+      spawnTimer = hugeWave ? 0.08 : 0.2;
+    }
+
+    function spawnNextZombie() {
+      if (gameOver || paused || spawnQueue <= 0) return;
+
+      const row = Math.floor(Math.random() * rows);
+      const type = chooseZombieType();
+      const hugeWave = isHugeWave();
+      const scale = (1 + currentWave * 0.08) * (hugeWave ? 1.35 : 1);
+      const speedScale = (1 + Math.min(0.9, currentWave * 0.025)) * (hugeWave ? 1.12 : 1);
+      const el = document.createElement("div");
+      el.className = "entity zombie " + type.type;
+      el.title = type.name;
+      el.innerHTML = zombieHtml();
+      arena.appendChild(el);
+
+      zombies.push({
+        type: type.type,
+        name: type.name,
+        row,
+        x: boardLeft + cols * cellW + 96,
+        y: boardTop + row * cellH + 8,
+        hp: Math.floor(type.hp * scale),
+        speed: type.speed * speedScale,
+        baseSpeed: type.speed * speedScale,
+        bite: Math.floor(type.bite * (1 + currentWave * 0.035) * (hugeWave ? 1.25 : 1)),
+        armored: !!type.armored,
+        attackTimer: 0,
+        slowTimer: 0,
+        slowFactor: 1,
+        el
+      });
+
+      spawnQueue--;
+      leftEl.textContent = zombies.length + spawnQueue;
+      spawnTimer = Math.max(hugeWave ? 0.18 : 0.33, 1.7 - currentWave * 0.09) * (hugeWave ? 0.58 : 1);
+    }
+
+    function createSunDrop(plant) {
+      const el = document.createElement("div");
+      el.className = "entity sun-drop";
+      arena.appendChild(el);
+
+      const startX = boardLeft + plant.col * cellW + 32;
+      const startY = boardTop + plant.row * cellH + 18;
+      const endX = startX + Math.random() * 58 - 24;
+      const endY = startY + 34 + Math.random() * 22;
+      const drop = { x: startX, y: startY, el };
+      sunDrops.push(drop);
+      el.style.left = startX + "px";
+      el.style.top = startY + "px";
+
+      requestAnimationFrame(() => {
+        drop.x = endX;
+        drop.y = endY;
+        el.style.left = endX + "px";
+        el.style.top = endY + "px";
+      });
+
+      el.addEventListener("click", () => {
+        sun += 50;
+        updateSunDisplay();
+        el.classList.add("collecting");
+        setTimeout(() => {
+          el.remove();
+          sunDrops = sunDrops.filter(item => item !== drop);
+        }, 180);
+      });
+    }
+
+    function chooseZombieType() {
+      const hugeWave = isHugeWave();
+      const available = zombieTypes.filter(type => currentWave >= type.unlock || (hugeWave && currentWave + 2 >= type.unlock));
+      const total = available.reduce((sum, type) => sum + type.weight * (hugeWave && type.unlock >= currentWave - 3 ? 2.6 : 1), 0);
+      let pick = Math.random() * total;
+      for (const type of available) {
+        pick -= type.weight * (hugeWave && type.unlock >= currentWave - 3 ? 2.6 : 1);
+        if (pick <= 0) return type;
+      }
+      return available[0];
+    }
+
+    function shoot(plant) {
+      const stats = plant.stats;
+      const torch = stats.torchable && plants.some(other => other.stats.torch && other.row === plant.row && other.col > plant.col && other.col <= plant.col + 3);
+      const target = stats.cobShot ? nearestZombieInLane(plant) : null;
+      const el = document.createElement("div");
+      el.className = "entity bullet" + (stats.slow ? " ice" : "") + (stats.heavy ? " heavy" : "") + (stats.cobShot ? " cob-shot" : "") + (torch ? " fire" : "");
+      arena.appendChild(el);
+      bullets.push({
+        row: plant.row,
+        x: boardLeft + plant.col * cellW + 72,
+        y: boardTop + plant.row * cellH + (stats.cobShot ? 24 : 34),
+        damage: stats.damage * (torch ? 2 : 1),
+        speed: stats.speed,
+        slow: stats.slow || 0,
+        splash: stats.splash || 0,
+        splashCells: stats.splashCells || 0,
+        splashRadius: stats.splashRadius || 0,
+        star: !!stats.star,
+        cobShot: !!stats.cobShot,
+        target,
+        el
+      });
+    }
+
+    function nearestZombieInLane(plant) {
+      const startX = boardLeft + plant.col * cellW;
+      let nearest = null;
+      for (const zombie of zombies) {
+        if (zombie.row !== plant.row || zombie.x <= startX) continue;
+        if (!nearest || zombie.x < nearest.x) nearest = zombie;
+      }
+      return nearest;
+    }
+
+    function explode(row, col, el, cell, stats) {
+      const range = document.createElement("div");
+      range.className = "explosion-range";
+      range.style.left = boardLeft + (col - stats.radius) * cellW + "px";
+      range.style.top = boardTop + (row - stats.radius) * cellH + "px";
+      arena.appendChild(range);
+      el.style.transform = "scale(1.35)";
+      el.style.filter = "brightness(1.8)";
+      for (const zombie of zombies) {
+        const zombieCol = Math.floor((zombie.x - boardLeft + 30) / cellW);
+        if (Math.abs(zombie.row - row) <= stats.radius && Math.abs(zombieCol - col) <= stats.radius) {
+          zombie.hp -= stats.damage;
+        }
+      }
+      setTimeout(() => {
+        el.remove();
+        cell.innerHTML = "";
+      }, 160);
+      setTimeout(() => {
+        range.remove();
+      }, 680);
+    }
+
+    function zombieInBombRange(plant) {
+      return zombies.some(zombie => {
+        const zombieCol = Math.floor((zombie.x - boardLeft + 30) / cellW);
+        return Math.abs(zombie.row - plant.row) <= plant.stats.radius && Math.abs(zombieCol - plant.col) <= plant.stats.radius;
+      });
+    }
+
+    function updateTallnutDamage(plant) {
+      if (plant.type !== "tallnut") return;
+      const ratio = Math.max(0, plant.hp / plant.maxHp);
+      plant.el.classList.toggle("damage-half", ratio <= 0.5);
+      plant.el.classList.toggle("damage-third", ratio > 0.5 && ratio <= 2 / 3);
+    }
+
+    function update(dt) {
+      if (gameOver || !gameStarted || paused) return;
+
+      if (waveActive && spawnQueue > 0) {
+        spawnTimer -= dt;
+        if (spawnTimer <= 0) spawnNextZombie();
+      }
+
+      if (!waveActive && nextWaveTimer > 0) {
+        nextWaveTimer -= dt;
+        if (nextWaveTimer <= 0) startWave();
+      }
+
+      for (const plant of plants) {
+        if (plant.stats.bomb) {
+          plant.bombTimer -= dt;
+          if (!plant.triggered && zombieInBombRange(plant)) {
+            plant.triggered = true;
+            plant.bombTimer = Math.min(plant.bombTimer, 1);
+            plant.el.style.filter = "brightness(1.55) drop-shadow(0 0 14px rgba(255, 72, 24, 0.95))";
+          }
+          if (!plant.exploding && plant.bombTimer <= 0) {
+            plant.exploding = true;
+            plant.hp = 0;
+            explode(plant.row, plant.col, plant.el, plant.cell, plant.stats);
+          }
+          continue;
+        }
+
+        if (plant.stats.sunProducer) {
+          plant.sunTimer -= dt;
+          if (plant.sunTimer <= 0) {
+            plant.sunTimer += plant.stats.sunCooldown;
+            plant.el.style.filter = "brightness(1.45) drop-shadow(0 0 10px rgba(255, 230, 80, 0.9))";
+            setTimeout(() => plant.el.style.filter = "", 140);
+            createSunDrop(plant);
+          }
+        }
+
+        if (plant.stats.spike) {
+          plant.spikeTimer -= dt;
+          if (plant.spikeTimer <= 0) {
+            for (const zombie of zombies) {
+              const zombieCol = Math.floor((zombie.x - boardLeft + 30) / cellW);
+              if (zombie.row === plant.row && zombieCol === plant.col) {
+                zombie.hp -= plant.stats.spikeDamage;
+                zombie.slowTimer = Math.max(zombie.slowTimer, plant.stats.spikeSlow || 0);
+                zombie.slowFactor = Math.min(zombie.slowTimer > 0 ? zombie.slowFactor : 1, 0.5);
+              }
+            }
+            plant.spikeTimer = plant.stats.spikeCooldown;
+          }
+        }
+
+        if (plant.stats.magnet) {
+          plant.magnetTimer -= dt;
+          if (plant.magnetTimer <= 0) {
+            const target = zombies.find(zombie => zombie.armored && Math.abs(zombie.row - plant.row) <= 1 && zombie.x > boardLeft);
+            if (target) {
+              target.armored = false;
+              target.hp *= 0.58;
+              target.el.style.opacity = "0.78";
+            }
+            plant.magnetTimer = plant.stats.magnetCooldown;
+          }
+        }
+
+        if (!plant.shoots) continue;
+        const hasTarget = plant.stats.cobShot ?
+          !!nearestZombieInLane(plant) : plant.stats.star ?
+          zombies.some(zombie => zombie.x > boardLeft + plant.col * cellW) :
+          zombies.some(zombie => zombie.row === plant.row && zombie.x > boardLeft + plant.col * cellW);
+        plant.cooldown -= dt;
+        if (hasTarget && plant.cooldown <= 0) {
+          shoot(plant);
+          plant.cooldown = plant.stats.cooldown;
+        }
+      }
+
+      for (const bullet of bullets) {
+        bullet.x += bullet.speed * dt;
+        if (bullet.cobShot && (!bullet.target || bullet.target.hp <= 0)) {
+          bullet.target = zombies
+            .filter(zombie => zombie.row === bullet.row && zombie.x >= bullet.x - 20)
+            .sort((a, b) => a.x - b.x)[0] || null;
+        }
+        const hit = bullet.cobShot ?
+          (bullet.target && bullet.x > bullet.target.x ? bullet.target : null) :
+          zombies.find(zombie => (bullet.star || zombie.row === bullet.row) && bullet.x > zombie.x && bullet.x < zombie.x + 70);
+        if (hit) {
+          if (bullet.cobShot) {
+            const hitCol = Math.floor((hit.x - boardLeft + 30) / cellW);
+            for (const zombie of zombies) {
+              const zombieCol = Math.floor((zombie.x - boardLeft + 30) / cellW);
+              if (Math.abs(zombie.row - hit.row) <= bullet.splashRadius && Math.abs(zombieCol - hitCol) <= bullet.splashRadius) {
+                zombie.hp -= bullet.damage;
+              }
+            }
+          } else {
+            hit.hp -= bullet.damage;
+            if (bullet.slow) {
+              hit.slowTimer = Math.max(hit.slowTimer, bullet.slow);
+              hit.slowFactor = Math.min(hit.slowTimer > 0 ? hit.slowFactor : 1, 0.45);
+            }
+            if (bullet.splashCells) {
+              const hitCol = Math.floor((hit.x - boardLeft + 30) / cellW);
+              for (const zombie of zombies) {
+                const zombieCol = Math.floor((zombie.x - boardLeft + 30) / cellW);
+                if (zombie.row === hit.row && zombieCol >= hitCol && zombieCol < hitCol + bullet.splashCells) {
+                  zombie.slowTimer = Math.max(zombie.slowTimer, bullet.slow || 0);
+                  zombie.slowFactor = Math.min(zombie.slowTimer > 0 ? zombie.slowFactor : 1, 0.45);
+                  if (zombie !== hit) zombie.hp -= Math.floor(bullet.damage * 0.55);
+                }
+              }
+            }
+            if (bullet.splash) {
+              for (const zombie of zombies) {
+                if (zombie !== hit && Math.abs(zombie.row - hit.row) <= 1 && Math.abs(zombie.x - hit.x) <= bullet.splash) {
+                  zombie.hp -= Math.floor(bullet.damage * 0.55);
+                  zombie.slowTimer = Math.max(zombie.slowTimer, bullet.slow || 0);
+                  zombie.slowFactor = Math.min(zombie.slowTimer > 0 ? zombie.slowFactor : 1, 0.45);
+                }
+              }
+            }
+          }
+          bullet.dead = true;
+        }
+        if (bullet.x > boardLeft + cols * cellW + 120) bullet.dead = true;
+      }
+
+      for (const mower of mowers) {
+        if (!mower.active) continue;
+        mower.x += 540 * dt;
+        for (const zombie of zombies) {
+          if (zombie.row === mower.row && zombie.x < mower.x + 70 && zombie.x > mower.x - 40) {
+            zombie.hp = 0;
+          }
+        }
+        if (mower.x > boardLeft + cols * cellW + 96) {
+          mower.el.remove();
+          mower.used = true;
+          mower.active = false;
+        }
+      }
+
+      for (const zombie of zombies) {
+        if (zombie.slowTimer > 0) {
+          zombie.slowTimer -= dt;
+          zombie.speed = zombie.baseSpeed * zombie.slowFactor;
+          zombie.el.style.filter = "hue-rotate(160deg) brightness(1.15)";
+        } else {
+          zombie.speed = zombie.baseSpeed;
+          zombie.slowFactor = 1;
+          zombie.el.style.filter = "";
+        }
+
+        const col = Math.floor((zombie.x - boardLeft + 30) / cellW);
+        const target = plants.find(plant => plant.row === zombie.row && plant.col === col && !plant.stats.spike);
+
+        if (target) {
+          zombie.attackTimer -= dt;
+          if (zombie.attackTimer <= 0) {
+            target.hp -= zombie.bite;
+            updateTallnutDamage(target);
+            target.el.style.filter = "brightness(1.5)";
+            setTimeout(() => target.el.style.filter = "", 90);
+            zombie.attackTimer = 0.7;
+          }
+        } else {
+          zombie.x -= zombie.speed * dt;
+        }
+
+        const mower = mowers.find(item => item.row === zombie.row && !item.used && !item.active);
+        if (mower && zombie.x < mower.x + 58) {
+          mower.active = true;
+          zombie.hp = 0;
+          continue;
+        }
+
+        if (zombie.x < boardLeft - 92) {
+          endGame(false);
+        }
+      }
+
+      plants = plants.filter(plant => {
+        if (plant.hp > 0) return true;
+        plant.el.remove();
+        return false;
+      });
+
+      zombies = zombies.filter(zombie => {
+        if (zombie.hp > 0) return true;
+        zombie.el.remove();
+        return false;
+      });
+
+      bullets = bullets.filter(bullet => {
+        if (!bullet.dead) return true;
+        bullet.el.remove();
+        return false;
+      });
+
+      leftEl.textContent = zombies.length + spawnQueue;
+      if (waveActive && spawnQueue === 0 && zombies.length === 0) {
+        waveActive = false;
+        currentWave++;
+        nextWaveTimer = 1.3;
+      }
+    }
+
+    function render() {
+      for (const zombie of zombies) {
+        zombie.el.style.left = zombie.x + "px";
+        zombie.el.style.top = zombie.y + "px";
+      }
+
+      for (const bullet of bullets) {
+        bullet.el.style.left = bullet.x + "px";
+        bullet.el.style.top = bullet.y + "px";
+      }
+
+      for (const mower of mowers) {
+        if (mower.used) continue;
+        mower.el.style.left = mower.x + "px";
+        mower.el.style.top = mower.y + "px";
+      }
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000) * gameSpeed;
+      lastTime = now;
+      update(dt);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function endGame(win) {
+      gameOver = true;
+      gameStarted = false;
+      paused = false;
+      startButton.textContent = "开始游戏";
+      startButton.disabled = true;
+      pauseButton.textContent = "暂停";
+      message.style.display = "block";
+      message.innerHTML = (win ? "本局结束。" : "失败！僵尸进入了房子。你坚持到了第 " + currentWave + " 波。") +
+        '<br><button onclick="location.reload()">重新开始</button>';
+    }
+
+    updateSunDisplay();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
