@@ -117,6 +117,16 @@
       line-height: 1.6;
     }
 
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     button {
       width: 100%;
       padding: 12px;
@@ -270,7 +280,18 @@
         </select>
       </div>
 
+      <div class="control">
+        <label for="edgeKeep">边缘保留 <span id="edgeKeepValue">1</span></label>
+        <input id="edgeKeep" type="range" min="0" max="4" value="1">
+      </div>
+
+      <div class="control">
+        <label for="edgeSoftness">边缘柔化 <span id="edgeSoftnessValue">2</span></label>
+        <input id="edgeSoftness" type="range" min="0" max="6" value="2">
+      </div>
+
       <p class="hint">说明：上传后可拖动、缩放裁剪框。开启智能抠图时会优先识别人像并替换背景；模型加载失败时会自动使用普通背景识别。</p>
+      <p id="segmentationStatus" class="status">智能抠图模型准备中，首次使用需要加载免费浏览器端模型。</p>
     </section>
 
     <section class="preview">
@@ -315,6 +336,11 @@
     var backgroundTolerance = document.getElementById('backgroundTolerance');
     var backgroundToleranceValue = document.getElementById('backgroundToleranceValue');
     var smartBackground = document.getElementById('smartBackground');
+    var edgeKeep = document.getElementById('edgeKeep');
+    var edgeKeepValue = document.getElementById('edgeKeepValue');
+    var edgeSoftness = document.getElementById('edgeSoftness');
+    var edgeSoftnessValue = document.getElementById('edgeSoftnessValue');
+    var segmentationStatus = document.getElementById('segmentationStatus');
     var specInfo = document.getElementById('specInfo');
     var downloadFormat = document.getElementById('downloadFormat');
     var downloadButton = document.getElementById('downloadButton');
@@ -449,6 +475,8 @@
 
       updateSpecInfo();
       backgroundToleranceValue.textContent = backgroundTolerance.value;
+      edgeKeepValue.textContent = edgeKeep.value;
+      edgeSoftnessValue.textContent = edgeSoftness.value;
       previewCanvas.width = spec.width;
       previewCanvas.height = spec.height;
       previewCanvas.style.width = Math.min(spec.width, 360) + 'px';
@@ -481,6 +509,9 @@
       if (smartBackground.value === 'on' && segmentationReady && selfieSegmentation) {
         runSmartBackground(croppedCanvas);
       } else {
+        if (smartBackground.value === 'on') {
+          segmentationStatus.textContent = '智能抠图模型暂不可用，已使用普通背景识别。';
+        }
         drawWithColorReplacement(croppedCanvas);
       }
     }
@@ -508,10 +539,44 @@
       }
 
       segmentationBusy = true;
+      segmentationStatus.textContent = '正在智能识别人像边缘...';
       selfieSegmentation.send({ image: croppedCanvas }).catch(function () {
         segmentationBusy = false;
+        segmentationStatus.textContent = '智能抠图失败，已使用普通背景识别。';
         drawWithColorReplacement(croppedCanvas);
       });
+    }
+
+    function refineMask(maskCanvas, keepPixels, softnessPixels) {
+      var refinedCanvas = document.createElement('canvas');
+      var refinedContext = refinedCanvas.getContext('2d');
+      var softCanvas;
+      var softContext;
+
+      refinedCanvas.width = maskCanvas.width;
+      refinedCanvas.height = maskCanvas.height;
+      refinedContext.drawImage(maskCanvas, 0, 0);
+
+      if (keepPixels > 0) {
+        refinedContext.globalCompositeOperation = 'source-over';
+        refinedContext.filter = 'blur(' + keepPixels + 'px)';
+        refinedContext.drawImage(maskCanvas, 0, 0);
+        refinedContext.filter = 'none';
+      }
+
+      if (softnessPixels > 0) {
+        softCanvas = document.createElement('canvas');
+        softContext = softCanvas.getContext('2d');
+        softCanvas.width = refinedCanvas.width;
+        softCanvas.height = refinedCanvas.height;
+        softContext.filter = 'blur(' + softnessPixels + 'px)';
+        softContext.drawImage(refinedCanvas, 0, 0);
+        refinedContext.clearRect(0, 0, refinedCanvas.width, refinedCanvas.height);
+        refinedContext.drawImage(softCanvas, 0, 0);
+      }
+
+      refinedContext.globalCompositeOperation = 'source-over';
+      return refinedCanvas;
     }
 
     function drawWithSegmentation(results) {
@@ -532,6 +597,7 @@
       maskCanvas.width = spec.width;
       maskCanvas.height = spec.height;
       maskContext.drawImage(results.segmentationMask, 0, 0, spec.width, spec.height);
+      maskCanvas = refineMask(maskCanvas, Number(edgeKeep.value), Number(edgeSoftness.value));
 
       personCanvas.width = spec.width;
       personCanvas.height = spec.height;
@@ -543,6 +609,7 @@
       previewContext.fillStyle = getSelectedColor();
       previewContext.fillRect(0, 0, spec.width, spec.height);
       previewContext.drawImage(personCanvas, 0, 0);
+      segmentationStatus.textContent = '智能抠图已完成，可调整边缘保留/柔化继续优化。';
 
       segmentationBusy = false;
 
@@ -716,6 +783,7 @@
     function initSegmentation() {
       if (typeof SelfieSegmentation === 'undefined') {
         smartBackground.value = 'off';
+        segmentationStatus.textContent = '智能抠图模型加载失败，当前使用普通背景识别。';
         return;
       }
 
@@ -731,6 +799,7 @@
 
       selfieSegmentation.onResults(drawWithSegmentation);
       segmentationReady = true;
+      segmentationStatus.textContent = '智能抠图已就绪，照片只在浏览器本地处理。';
     }
 
     imageInput.addEventListener('change', function () {
@@ -787,6 +856,8 @@
     customColor.addEventListener('input', drawPhoto);
     backgroundTolerance.addEventListener('input', drawPhoto);
     smartBackground.addEventListener('change', drawPhoto);
+    edgeKeep.addEventListener('input', drawPhoto);
+    edgeSoftness.addEventListener('input', drawPhoto);
 
     downloadButton.addEventListener('click', function () {
       if (!hasImage) {
