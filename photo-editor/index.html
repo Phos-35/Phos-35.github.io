@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>证件照尺寸修改工具</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: #f3f5f8;
+      color: #222;
+    }
+
+    header {
+      padding: 24px;
+      text-align: center;
+      background: #263445;
+      color: white;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      color: #d8e0ea;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .panel,
+    .preview {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+    }
+
+    .panel h2,
+    .preview h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .file-box {
+      margin-bottom: 24px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #9aa8b8;
+      border-radius: 8px;
+      background: #f8fafc;
+      box-sizing: border-box;
+    }
+
+    .control {
+      margin-bottom: 18px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    select,
+    input[type="color"],
+    input[type="range"] {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    select {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+    }
+
+    input[type="color"] {
+      height: 44px;
+      padding: 4px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+    }
+
+    .spec-info {
+      margin: 0 0 18px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #eef6ff;
+      color: #1e3a5f;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .hint {
+      margin: 12px 0 0;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .download-button {
+      background: #16a34a;
+    }
+
+    .download-button:hover {
+      background: #15803d;
+    }
+
+    .download-row {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .download-row select,
+    .download-row button {
+      height: 44px;
+    }
+
+    .preview-area {
+      min-height: 320px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      overflow: auto;
+      text-align: center;
+      color: #64748b;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .cropper-box {
+      display: none;
+      max-height: 520px;
+    }
+
+    .cropper-box img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .output-title {
+      margin: 18px 0 10px;
+      color: #334155;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .preview-card {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      border-radius: 10px;
+      background: #e2e8f0;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
+
+    .preview-area canvas {
+      max-width: 100%;
+      max-height: 560px;
+      display: none;
+      background: white;
+    }
+
+    @media (max-width: 760px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>证件照尺寸修改工具</h1>
+    <p>选择照片类型、像素尺寸和背景色，快速导出常用证件照。</p>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h2>操作面板</h2>
+
+      <div class="file-box">
+        <label for="imageInput">选择图片</label>
+        <input id="imageInput" type="file" accept="image/*">
+      </div>
+
+      <div class="control">
+        <label for="photoType">照片类型</label>
+        <select id="photoType">
+          <option value="standard1">标准一寸 - 25 × 35 mm / 295 × 413 px</option>
+          <option value="small1">小一寸 - 22 × 32 mm / 259 × 377 px</option>
+          <option value="large1">大一寸 - 33 × 48 mm / 390 × 567 px</option>
+          <option value="standard2">标准二寸 - 35 × 49 mm / 413 × 579 px</option>
+          <option value="small2">小二寸/护照 - 33 × 48 mm / 390 × 567 px</option>
+          <option value="chinaId">中国身份证 - 26 × 32 mm / 358 × 441 px</option>
+          <option value="driverLicense">中国驾驶证 - 22 × 32 mm / 259 × 377 px</option>
+          <option value="usVisa">美国签证 - 51 × 51 mm / 600 × 600 px</option>
+          <option value="schengenVisa">欧洲申根签证 - 35 × 45 mm / 413 × 531 px</option>
+          <option value="japanVisa">日本签证 - 45 × 45 mm / 531 × 531 px</option>
+          <option value="canadaAustraliaVisa">加拿大/澳大利亚签证 - 35 × 45 mm / 413 × 531 px</option>
+        </select>
+      </div>
+
+      <div id="specInfo" class="spec-info"></div>
+
+      <div class="control">
+        <label for="backgroundColor">背景色</label>
+        <select id="backgroundColor">
+          <option value="#ffffff">白色</option>
+          <option value="#438edb">蓝色</option>
+          <option value="#d71920">红色</option>
+          <option value="#d8ecff">浅蓝色</option>
+          <option value="#f2f2f2">灰白色</option>
+          <option value="#eeeeee">浅灰色</option>
+          <option value="#fff8e7">乳白色</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="customColor">自定义背景色</label>
+        <input id="customColor" type="color" value="#ffffff">
+      </div>
+
+      <div class="control">
+        <label for="backgroundTolerance">背景识别强度 <span id="backgroundToleranceValue">45</span></label>
+        <input id="backgroundTolerance" type="range" min="10" max="120" value="45">
+      </div>
+
+      <div class="control">
+        <label for="smartBackground">智能人像抠图</label>
+        <select id="smartBackground">
+          <option value="on">开启</option>
+          <option value="off">关闭</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="edgeKeep">边缘保留 <span id="edgeKeepValue">1</span></label>
+        <input id="edgeKeep" type="range" min="0" max="4" value="1">
+      </div>
+
+      <div class="control">
+        <label for="edgeSoftness">边缘柔化 <span id="edgeSoftnessValue">2</span></label>
+        <input id="edgeSoftness" type="range" min="0" max="6" value="2">
+      </div>
+
+      <p class="hint">说明：上传后可拖动、缩放裁剪框。开启智能抠图时会优先识别人像并替换背景；模型加载失败时会自动使用普通背景识别。</p>
+      <p id="segmentationStatus" class="status">智能抠图模型准备中，首次使用需要加载免费浏览器端模型。</p>
+    </section>
+
+    <section class="preview">
+      <h2>预览区域</h2>
+      <div class="preview-area">
+        <span id="placeholder">图片会显示在这里</span>
+        <div id="cropperBox" class="cropper-box">
+          <img id="cropperImage" alt="裁剪编辑">
+        </div>
+        <div id="outputTitle" class="output-title" style="display: none;">导出预览</div>
+        <div class="preview-card">
+          <canvas id="previewCanvas"></canvas>
+        </div>
+      </div>
+      <div class="download-row">
+        <select id="downloadFormat" aria-label="下载格式">
+          <option value="jpeg">JPEG</option>
+          <option value="jpg">JPG</option>
+          <option value="png">PNG</option>
+          <option value="bmp">BMP</option>
+          <option value="tiff">TIFF</option>
+        </select>
+        <button id="downloadButton" class="download-button" type="button">下载证件照</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
+  <script>
+    var imageInput = document.getElementById('imageInput');
+    var cropperImage = document.getElementById('cropperImage');
+    var cropperBox = document.getElementById('cropperBox');
+    var previewCanvas = document.getElementById('previewCanvas');
+    var previewCard = document.querySelector('.preview-card');
+    var previewContext = previewCanvas.getContext('2d');
+    var placeholder = document.getElementById('placeholder');
+    var outputTitle = document.getElementById('outputTitle');
+    var photoType = document.getElementById('photoType');
+    var backgroundColor = document.getElementById('backgroundColor');
+    var customColor = document.getElementById('customColor');
+    var backgroundTolerance = document.getElementById('backgroundTolerance');
+    var backgroundToleranceValue = document.getElementById('backgroundToleranceValue');
+    var smartBackground = document.getElementById('smartBackground');
+    var edgeKeep = document.getElementById('edgeKeep');
+    var edgeKeepValue = document.getElementById('edgeKeepValue');
+    var edgeSoftness = document.getElementById('edgeSoftness');
+    var edgeSoftnessValue = document.getElementById('edgeSoftnessValue');
+    var segmentationStatus = document.getElementById('segmentationStatus');
+    var specInfo = document.getElementById('specInfo');
+    var downloadFormat = document.getElementById('downloadFormat');
+    var downloadButton = document.getElementById('downloadButton');
+    var cropper = null;
+    var hasImage = false;
+    var selfieSegmentation = null;
+    var segmentationReady = false;
+    var segmentationBusy = false;
+    var pendingDraw = false;
+    var currentCroppedCanvas = null;
+
+    var specs = {
+      standard1: {
+        name: '标准一寸',
+        mm: '25 × 35 mm',
+        width: 295,
+        height: 413,
+        background: '白、蓝、红',
+        use: '身份证、学生证、各类考试报名'
+      },
+      small1: {
+        name: '小一寸',
+        mm: '22 × 32 mm',
+        width: 259,
+        height: 377,
+        background: '白、蓝',
+        use: '驾驶证、社保卡'
+      },
+      large1: {
+        name: '大一寸',
+        mm: '33 × 48 mm',
+        width: 390,
+        height: 567,
+        background: '白，部分签证需浅蓝',
+        use: '护照、港澳通行证、各类签证'
+      },
+      standard2: {
+        name: '标准二寸',
+        mm: '35 × 49 mm',
+        width: 413,
+        height: 579,
+        background: '白、蓝、红',
+        use: '护照、签证、部分资格考试'
+      },
+      small2: {
+        name: '小二寸（护照）',
+        mm: '33 × 48 mm',
+        width: 390,
+        height: 567,
+        background: '纯白',
+        use: '中国护照、部分国家签证'
+      },
+      chinaId: {
+        name: '中国身份证',
+        mm: '26 × 32 mm',
+        width: 358,
+        height: 441,
+        background: '纯白',
+        use: '第二代居民身份证，350dpi'
+      },
+      driverLicense: {
+        name: '中国驾驶证',
+        mm: '22 × 32 mm',
+        width: 259,
+        height: 377,
+        background: '纯白',
+        use: '机动车驾驶证'
+      },
+      usVisa: {
+        name: '美国签证',
+        mm: '51 × 51 mm',
+        width: 600,
+        height: 600,
+        background: '白、灰白',
+        use: '美国签证申请'
+      },
+      schengenVisa: {
+        name: '欧洲申根签证',
+        mm: '35 × 45 mm',
+        width: 413,
+        height: 531,
+        background: '浅灰、乳白',
+        use: '欧洲申根签证申请'
+      },
+      japanVisa: {
+        name: '日本签证',
+        mm: '45 × 45 mm',
+        width: 531,
+        height: 531,
+        background: '白底',
+        use: '日本签证申请'
+      },
+      canadaAustraliaVisa: {
+        name: '加拿大/澳大利亚签证',
+        mm: '35 × 45 mm',
+        width: 413,
+        height: 531,
+        background: '白、浅色背景',
+        use: '加拿大或澳大利亚签证申请'
+      }
+    };
+
+    function getSelectedSpec() {
+      return specs[photoType.value];
+    }
+
+    function getSelectedColor() {
+      return customColor.value || backgroundColor.value;
+    }
+
+    function hexToRgb(hex) {
+      return {
+        r: parseInt(hex.slice(1, 3), 16),
+        g: parseInt(hex.slice(3, 5), 16),
+        b: parseInt(hex.slice(5, 7), 16)
+      };
+    }
+
+    function updateSpecInfo() {
+      var spec = getSelectedSpec();
+      specInfo.innerHTML =
+        '<strong>' + spec.name + '</strong><br>' +
+        '尺寸：' + spec.mm + '<br>' +
+        '像素：' + spec.width + ' × ' + spec.height + ' px<br>' +
+        '常见背景：' + spec.background + '<br>' +
+        '主要用途：' + spec.use;
+    }
+
+    function drawPhoto() {
+      var spec = getSelectedSpec();
+      var croppedCanvas;
+
+      updateSpecInfo();
+      backgroundToleranceValue.textContent = backgroundTolerance.value;
+      edgeKeepValue.textContent = edgeKeep.value;
+      edgeSoftnessValue.textContent = edgeSoftness.value;
+      previewCanvas.width = spec.width;
+      previewCanvas.height = spec.height;
+      previewCanvas.style.width = Math.min(spec.width, 360) + 'px';
+      previewCanvas.style.height = 'auto';
+
+      previewContext.fillStyle = getSelectedColor();
+      previewContext.fillRect(0, 0, spec.width, spec.height);
+
+      if (!hasImage) {
+        return;
+      }
+
+      if (!cropper) {
+        return;
+      }
+
+      croppedCanvas = cropper.getCroppedCanvas({
+        width: spec.width,
+        height: spec.height,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+
+      if (!croppedCanvas) {
+        return;
+      }
+
+      currentCroppedCanvas = croppedCanvas;
+
+      if (smartBackground.value === 'on' && segmentationReady && selfieSegmentation) {
+        runSmartBackground(croppedCanvas);
+      } else {
+        if (smartBackground.value === 'on') {
+          segmentationStatus.textContent = '智能抠图模型暂不可用，已使用普通背景识别。';
+        }
+        drawWithColorReplacement(croppedCanvas);
+      }
+    }
+
+    function drawWithColorReplacement(croppedCanvas) {
+      var spec = getSelectedSpec();
+      var tempCanvas = document.createElement('canvas');
+      var tempContext = tempCanvas.getContext('2d');
+      var imageData;
+
+      tempCanvas.width = spec.width;
+      tempCanvas.height = spec.height;
+      tempContext.fillStyle = getSelectedColor();
+      tempContext.fillRect(0, 0, spec.width, spec.height);
+      tempContext.drawImage(croppedCanvas, 0, 0);
+      imageData = tempContext.getImageData(0, 0, spec.width, spec.height);
+      replaceBackground(imageData, spec.width, spec.height, getSelectedColor(), Number(backgroundTolerance.value));
+      previewContext.putImageData(imageData, 0, 0);
+    }
+
+    function runSmartBackground(croppedCanvas) {
+      if (segmentationBusy) {
+        pendingDraw = true;
+        return;
+      }
+
+      segmentationBusy = true;
+      segmentationStatus.textContent = '正在智能识别人像边缘...';
+      selfieSegmentation.send({ image: croppedCanvas }).catch(function () {
+        segmentationBusy = false;
+        segmentationStatus.textContent = '智能抠图失败，已使用普通背景识别。';
+        drawWithColorReplacement(croppedCanvas);
+      });
+    }
+
+    function refineMask(maskCanvas, keepPixels, softnessPixels) {
+      var refinedCanvas = document.createElement('canvas');
+      var refinedContext = refinedCanvas.getContext('2d');
+      var softCanvas;
+      var softContext;
+
+      refinedCanvas.width = maskCanvas.width;
+      refinedCanvas.height = maskCanvas.height;
+      refinedContext.drawImage(maskCanvas, 0, 0);
+
+      if (keepPixels > 0) {
+        refinedContext.globalCompositeOperation = 'source-over';
+        refinedContext.filter = 'blur(' + keepPixels + 'px)';
+        refinedContext.drawImage(maskCanvas, 0, 0);
+        refinedContext.filter = 'none';
+      }
+
+      if (softnessPixels > 0) {
+        softCanvas = document.createElement('canvas');
+        softContext = softCanvas.getContext('2d');
+        softCanvas.width = refinedCanvas.width;
+        softCanvas.height = refinedCanvas.height;
+        softContext.filter = 'blur(' + softnessPixels + 'px)';
+        softContext.drawImage(refinedCanvas, 0, 0);
+        refinedContext.clearRect(0, 0, refinedCanvas.width, refinedCanvas.height);
+        refinedContext.drawImage(softCanvas, 0, 0);
+      }
+
+      refinedContext.globalCompositeOperation = 'source-over';
+      return refinedCanvas;
+    }
+
+    function drawWithSegmentation(results) {
+      var spec = getSelectedSpec();
+      var maskCanvas = document.createElement('canvas');
+      var maskContext = maskCanvas.getContext('2d');
+      var personCanvas = document.createElement('canvas');
+      var personContext = personCanvas.getContext('2d');
+
+      if (!currentCroppedCanvas || !results.segmentationMask) {
+        segmentationBusy = false;
+        if (currentCroppedCanvas) {
+          drawWithColorReplacement(currentCroppedCanvas);
+        }
+        return;
+      }
+
+      maskCanvas.width = spec.width;
+      maskCanvas.height = spec.height;
+      maskContext.drawImage(results.segmentationMask, 0, 0, spec.width, spec.height);
+      maskCanvas = refineMask(maskCanvas, Number(edgeKeep.value), Number(edgeSoftness.value));
+
+      personCanvas.width = spec.width;
+      personCanvas.height = spec.height;
+      personContext.drawImage(currentCroppedCanvas, 0, 0, spec.width, spec.height);
+      personContext.globalCompositeOperation = 'destination-in';
+      personContext.drawImage(maskCanvas, 0, 0);
+
+      previewContext.clearRect(0, 0, spec.width, spec.height);
+      previewContext.fillStyle = getSelectedColor();
+      previewContext.fillRect(0, 0, spec.width, spec.height);
+      previewContext.drawImage(personCanvas, 0, 0);
+      segmentationStatus.textContent = '智能抠图已完成，可调整边缘保留/柔化继续优化。';
+
+      segmentationBusy = false;
+
+      if (pendingDraw) {
+        pendingDraw = false;
+        drawPhoto();
+      }
+    }
+
+    function getAverageCornerColor(data, width, height) {
+      var sampleSize = Math.max(8, Math.floor(Math.min(width, height) * 0.08));
+      var areas = [
+        { x: 0, y: 0 },
+        { x: width - sampleSize, y: 0 },
+        { x: 0, y: height - sampleSize },
+        { x: width - sampleSize, y: height - sampleSize }
+      ];
+      var totalR = 0;
+      var totalG = 0;
+      var totalB = 0;
+      var count = 0;
+
+      for (var a = 0; a < areas.length; a++) {
+        for (var y = areas[a].y; y < areas[a].y + sampleSize; y++) {
+          for (var x = areas[a].x; x < areas[a].x + sampleSize; x++) {
+            var index = (y * width + x) * 4;
+            totalR += data[index];
+            totalG += data[index + 1];
+            totalB += data[index + 2];
+            count++;
+          }
+        }
+      }
+
+      return {
+        r: totalR / count,
+        g: totalG / count,
+        b: totalB / count
+      };
+    }
+
+    function replaceBackground(imageData, width, height, targetHex, tolerance) {
+      var data = imageData.data;
+      var sourceColor = getAverageCornerColor(data, width, height);
+      var targetColor = hexToRgb(targetHex);
+
+      for (var i = 0; i < data.length; i += 4) {
+        var distance = Math.sqrt(
+          Math.pow(data[i] - sourceColor.r, 2) +
+          Math.pow(data[i + 1] - sourceColor.g, 2) +
+          Math.pow(data[i + 2] - sourceColor.b, 2)
+        );
+
+        if (distance < tolerance) {
+          var blend = 1 - distance / tolerance;
+          data[i] = data[i] * (1 - blend) + targetColor.r * blend;
+          data[i + 1] = data[i + 1] * (1 - blend) + targetColor.g * blend;
+          data[i + 2] = data[i + 2] * (1 - blend) + targetColor.b * blend;
+          data[i + 3] = 255;
+        }
+      }
+    }
+
+    function writeAscii(view, offset, text) {
+      for (var i = 0; i < text.length; i++) {
+        view.setUint8(offset + i, text.charCodeAt(i));
+      }
+    }
+
+    function createBmpBlob(canvas) {
+      var context = canvas.getContext('2d');
+      var width = canvas.width;
+      var height = canvas.height;
+      var rowSize = Math.floor((24 * width + 31) / 32) * 4;
+      var pixelDataSize = rowSize * height;
+      var fileSize = 54 + pixelDataSize;
+      var buffer = new ArrayBuffer(fileSize);
+      var view = new DataView(buffer);
+      var imageData = context.getImageData(0, 0, width, height).data;
+      var offset = 54;
+
+      writeAscii(view, 0, 'BM');
+      view.setUint32(2, fileSize, true);
+      view.setUint32(10, 54, true);
+      view.setUint32(14, 40, true);
+      view.setInt32(18, width, true);
+      view.setInt32(22, height, true);
+      view.setUint16(26, 1, true);
+      view.setUint16(28, 24, true);
+      view.setUint32(34, pixelDataSize, true);
+
+      for (var y = height - 1; y >= 0; y--) {
+        var rowStart = offset;
+
+        for (var x = 0; x < width; x++) {
+          var source = (y * width + x) * 4;
+          view.setUint8(offset++, imageData[source + 2]);
+          view.setUint8(offset++, imageData[source + 1]);
+          view.setUint8(offset++, imageData[source]);
+        }
+
+        offset = rowStart + rowSize;
+      }
+
+      return new Blob([buffer], { type: 'image/bmp' });
+    }
+
+    function createTiffBlob(canvas) {
+      var context = canvas.getContext('2d');
+      var width = canvas.width;
+      var height = canvas.height;
+      var imageData = context.getImageData(0, 0, width, height).data;
+      var pixelDataSize = width * height * 3;
+      var entries = 10;
+      var ifdOffset = 8;
+      var bitsOffset = ifdOffset + 2 + entries * 12 + 4;
+      var pixelOffset = bitsOffset + 6;
+      var buffer = new ArrayBuffer(pixelOffset + pixelDataSize);
+      var view = new DataView(buffer);
+      var entryOffset = ifdOffset + 2;
+      var dataOffset = pixelOffset;
+
+      function writeEntry(tag, type, count, value) {
+        view.setUint16(entryOffset, tag, true);
+        view.setUint16(entryOffset + 2, type, true);
+        view.setUint32(entryOffset + 4, count, true);
+        view.setUint32(entryOffset + 8, value, true);
+        entryOffset += 12;
+      }
+
+      writeAscii(view, 0, 'II');
+      view.setUint16(2, 42, true);
+      view.setUint32(4, ifdOffset, true);
+      view.setUint16(ifdOffset, entries, true);
+
+      view.setUint16(bitsOffset, 8, true);
+      view.setUint16(bitsOffset + 2, 8, true);
+      view.setUint16(bitsOffset + 4, 8, true);
+
+      writeEntry(256, 4, 1, width);
+      writeEntry(257, 4, 1, height);
+      writeEntry(258, 3, 3, bitsOffset);
+      writeEntry(259, 3, 1, 1);
+      writeEntry(262, 3, 1, 2);
+      writeEntry(273, 4, 1, pixelOffset);
+      writeEntry(277, 3, 1, 3);
+      writeEntry(278, 4, 1, height);
+      writeEntry(279, 4, 1, pixelDataSize);
+      writeEntry(284, 3, 1, 1);
+      view.setUint32(entryOffset, 0, true);
+
+      for (var i = 0; i < imageData.length; i += 4) {
+        view.setUint8(dataOffset++, imageData[i]);
+        view.setUint8(dataOffset++, imageData[i + 1]);
+        view.setUint8(dataOffset++, imageData[i + 2]);
+      }
+
+      return new Blob([buffer], { type: 'image/tiff' });
+    }
+
+    function downloadBlob(blob, fileName) {
+      var link = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+
+      link.download = fileName;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function initSegmentation() {
+      if (typeof SelfieSegmentation === 'undefined') {
+        smartBackground.value = 'off';
+        segmentationStatus.textContent = '智能抠图模型加载失败，当前使用普通背景识别。';
+        return;
+      }
+
+      selfieSegmentation = new SelfieSegmentation({
+        locateFile: function (file) {
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/' + file;
+        }
+      });
+
+      selfieSegmentation.setOptions({
+        modelSelection: 1
+      });
+
+      selfieSegmentation.onResults(drawWithSegmentation);
+      segmentationReady = true;
+      segmentationStatus.textContent = '智能抠图已就绪，照片只在浏览器本地处理。';
+    }
+
+    imageInput.addEventListener('change', function () {
+      var file = imageInput.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      if (typeof Cropper === 'undefined') {
+        alert('CropperJS 加载失败，请确认网络可以访问 CDN。');
+        return;
+      }
+
+      cropperImage.src = URL.createObjectURL(file);
+      cropperBox.style.display = 'block';
+      previewCard.style.display = 'inline-flex';
+      previewCanvas.style.display = 'block';
+      placeholder.style.display = 'none';
+      outputTitle.style.display = 'block';
+      hasImage = true;
+
+      cropper = new Cropper(cropperImage, {
+        aspectRatio: getSelectedSpec().width / getSelectedSpec().height,
+        viewMode: 1,
+        autoCropArea: 0.85,
+        background: false,
+        responsive: true,
+        crop: drawPhoto,
+        zoom: drawPhoto,
+        ready: drawPhoto
+      });
+    });
+
+    photoType.addEventListener('change', function () {
+      var spec = getSelectedSpec();
+
+      if (cropper) {
+        cropper.setAspectRatio(spec.width / spec.height);
+      }
+
+      drawPhoto();
+    });
+
+    backgroundColor.addEventListener('change', function () {
+      customColor.value = backgroundColor.value;
+      drawPhoto();
+    });
+
+    customColor.addEventListener('input', drawPhoto);
+    backgroundTolerance.addEventListener('input', drawPhoto);
+    smartBackground.addEventListener('change', drawPhoto);
+    edgeKeep.addEventListener('input', drawPhoto);
+    edgeSoftness.addEventListener('input', drawPhoto);
+
+    downloadButton.addEventListener('click', function () {
+      if (!hasImage) {
+        alert('请先选择一张图片。');
+        return;
+      }
+
+      var spec = getSelectedSpec();
+      var format = downloadFormat.value;
+      var fileBaseName = spec.name + '-' + spec.width + 'x' + spec.height;
+
+      if (segmentationBusy) {
+        alert('智能抠图处理中，请稍后再下载。');
+        return;
+      }
+
+      if (smartBackground.value !== 'on') {
+        drawPhoto();
+      }
+
+      if (format === 'png') {
+        downloadBlob(dataUrlToBlob(previewCanvas.toDataURL('image/png')), fileBaseName + '.png');
+      } else if (format === 'jpeg' || format === 'jpg') {
+        downloadBlob(dataUrlToBlob(previewCanvas.toDataURL('image/jpeg', 0.95)), fileBaseName + '.' + format);
+      } else if (format === 'bmp') {
+        downloadBlob(createBmpBlob(previewCanvas), fileBaseName + '.bmp');
+      } else {
+        downloadBlob(createTiffBlob(previewCanvas), fileBaseName + '.tiff');
+      }
+    });
+
+    function dataUrlToBlob(dataUrl) {
+      var parts = dataUrl.split(',');
+      var contentType = parts[0].split(':')[1].split(';')[0];
+      var binary = atob(parts[1]);
+      var bytes = new Uint8Array(binary.length);
+
+      for (var i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      return new Blob([bytes], { type: contentType });
+    }
+
+    updateSpecInfo();
+    initSegmentation();
+  </script>
+</body>
+</html>
